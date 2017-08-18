@@ -1,0 +1,109 @@
+﻿@using StringResources
+@model PhotoAlbum.Client.Models.FeedModel
+
+@{
+    ViewBag.Title = "AllPhotos";
+}
+<script src="~/scripts/star-rating.js"></script>
+<script src="~/scripts/posts-scrolling.js"></script>
+@*<link rel="stylesheet" type="text/css" href="~/Content/stars.css">*@
+
+<div class="container app" align="center">
+    <div class="radioBtns" align="left" style="width: 80%">
+        <label class="radio-inline">
+            <input class="radioBtn" type="radio" name="optradio" checked="checked" id="newFirst" value="new"/>@Resources.NewFirst
+        </label>
+        <label class="radio-inline">
+            <input class="radioBtn" type="radio" name="optradio" id="popularFirst" value="popular" />@Resources.PopularFirst
+        </label>
+    </div>
+    
+    @if (Model.UserFilter != null)
+    {
+        <div align="left" style="width: 80%">
+            <h2>@Model.UserFilter</h2>
+            <h4>@Model.UserName</h4>
+        </div>
+    }
+
+    <div id="scrollList">
+        @{ Html.RenderPartial("_Posts", Model.Posts);}
+    </div>
+    <div class="loader" id="spinner"></div>
+</div>
+
+
+
+<script>
+    $('#spinner').hide();
+
+
+    $('.radioBtn').click(function (e) {
+        $('#scrollList').empty();
+        $('#spinner').show();
+
+        var requestUrl = "@Url.Action("Posts")";
+        var requestData = { order: $(this).attr("value") }
+
+        @if (ViewBag.UserFilter != null)
+        {
+            @: requestUrl = "@Url.Action("Posts")";
+            @: requestData = { order: $(this).attr("value"), username: "@ViewBag.UserFilter" }
+        }
+
+        $.ajax({
+            type: 'GET',
+            url: requestUrl,
+            data: requestData,
+            success: function (data) {
+                currentPage = 0;
+                //$('#scrollList').empty();
+                $('#spinner').hide();
+                $('#scrollList').append(data);
+
+                $('.widget-rating').each(function () {
+                    set_votes($(this));
+                });
+
+                $('.widget-my-rating').each(function () {
+                    set_votes($(this));
+                });
+
+                $('.my-rating').hover(ratingMouseOver, ratingMouseOut);
+            }
+        });
+    });
+
+
+    $('.my-rating').hover(ratingMouseOver, ratingMouseOut);
+
+    $('.widget-rating').each(function () {
+        set_votes($(this));
+    });
+
+    $('.widget-my-rating').each(function () {
+        set_votes($(this));
+    });
+
+    $('#scrollList').on('click', '.my-rating', ratingClick);
+
+    var currentPage = 0;
+    var inCallback = false;
+
+    $(window).scroll(function () {
+        if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+            @if (ViewBag.UserFilter != null)
+            {
+                @: loadPosts({ username: "@ViewBag.UserFilter", page: ++currentPage },
+                @: "@Url.Action("Posts")", $('#scrollList'));
+
+            }
+            else
+            {
+                @: var ord = $('input[name=optradio]:checked').val();
+                @: loadPosts({ page: ++currentPage, order: ord }, "@Url.Action("Posts")", $('#scrollList'));
+            }
+        }
+    });
+
+</script>

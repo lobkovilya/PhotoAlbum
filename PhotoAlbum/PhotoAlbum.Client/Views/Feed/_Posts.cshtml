@@ -1,0 +1,40 @@
+﻿@using StringResources
+@model IEnumerable<PhotoAlbum.Client.Models.PostDisplayModel>
+
+@foreach (var item in Model)
+{
+    <div class="col-*-* post" style="width: 80%">
+        <div class="thumbnail">
+            <img src="@item.PhotoUrl" alt="@item.Caption" style="width:100%">
+            <div class="col-*-4" align="left">
+                <h1 class="app-text-size">@item.Caption</h1>
+                <h5 class="app-text-size">@item.Description</h5>
+            </div>
+            <div class="col-*-4" align="left">
+                <h5>@Resources.PostAddedBy @Html.RouteLink(item.Login, "User", new {userFilter = item.Login}) @item.Date</h5>
+            </div>
+            <div class="col-*-4" align="left">
+                <h5>
+                    @Resources.Rating: 
+                    <span class="widget-rating" data-rate="@item.Rating" data-postid="@item.Id" title="@item.MarksAmount">
+                        <span class="star_1 rating glyphicon glyphicon-star-empty" data-rating="1"></span>
+                        <span class="star_2 rating glyphicon glyphicon-star-empty" data-rating="2"></span>
+                        <span class="star_3 rating glyphicon glyphicon-star-empty" data-rating="3"></span>
+                        <span class="star_4 rating glyphicon glyphicon-star-empty" data-rating="4"></span>
+                        <span class="star_5 rating glyphicon glyphicon-star-empty" data-rating="5"></span>
+                    </span>
+                    @if (User.Identity.IsAuthenticated) { 
+                        @:&emsp;@Resources.MyRating:
+                        <span class="widget-my-rating star-enabled" data-rate="@item.UserMark" data-postid="@item.Id">
+                            <span class="star_1 my-rating glyphicon glyphicon-star-empty" data-rating="1"></span>
+                            <span class="star_2 my-rating glyphicon glyphicon-star-empty" data-rating="2"></span>
+                            <span class="star_3 my-rating glyphicon glyphicon-star-empty" data-rating="3"></span>
+                            <span class="star_4 my-rating glyphicon glyphicon-star-empty" data-rating="4"></span>
+                            <span class="star_5 my-rating glyphicon glyphicon-star-empty" data-rating="5"></span>
+                        </span>
+                    }
+                </h5>
+            </div>
+        </div>
+    </div>
+}

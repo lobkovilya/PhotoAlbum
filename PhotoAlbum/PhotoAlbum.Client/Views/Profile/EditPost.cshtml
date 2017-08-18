@@ -1,0 +1,74 @@
+﻿@using StringResources
+@model PhotoAlbum.Client.Models.PostEditModel
+
+@*@using (Html.BeginForm())
+{*@
+@using (Ajax.BeginForm("EditPost", new AjaxOptions { OnSuccess = "editPostSuccess"}))
+{ 
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">@Resources.EditPost</h4>
+            </div>
+
+            <div class="modal-body">
+
+                @Html.AntiForgeryToken()
+
+                <div class="form-horizontal">
+                    @*<hr/>*@
+                    @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+                    @Html.Hidden("Id", Model.Id)
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Caption, htmlAttributes: new {@class = "control-label col-md-2"})
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Caption, new {htmlAttributes = new {@class = "form-control", maxlength = "50" } })
+                            @Html.ValidationMessageFor(model => model.Caption, "", new {@class = "text-danger"})
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Description, htmlAttributes: new {@class = "control-label col-md-2"})
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Description, new {htmlAttributes = new {@class = "form-control", rows = "4", maxlength = "500" } })
+                            @Html.ValidationMessageFor(model => model.Description, "", new {@class = "text-danger"})
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <input type="submit" value="@Resources.Save" class="btn btn-default"/>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+}
+
+<script>
+    function editPostSuccess(data) {
+        if (data.Status === "success") {
+            $("#myModal").modal('hide');
+            $('#post_' + data.PostId).find('.post-caption').html(data.Caption);
+            $('#post_' + data.PostId).find('.post-description').html(data.Description);
+        } else {
+            $.each(data.FormErrors, function () {
+                $("[data-valmsg-for=" + this.key + "]").html(this.errors.join());
+            });
+        }
+    };
+
+
+</script>
+
+
+

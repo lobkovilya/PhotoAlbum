@@ -1,0 +1,129 @@
+﻿@using StringResources
+@model PhotoAlbum.Client.Models.PostCreateModel
+
+<link rel="stylesheet" type="text/css" href="~/Content/stars.css">
+
+<div id="createPostModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">@Resources.CreatePost</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-horizontal" id="createForm">
+                    @Html.ValidationSummary(true, "", new {@class = "text-danger"})
+
+                    <div class="form-group">
+                        @Html.Label(Resources.Photo, htmlAttributes: new {@class = "control-label col-md-2"})
+                        <div class="col-md-10 filechooser">
+                            <input id="uploadFile" type="file" name="photo" class="file-input form-control" accept="image/*" required/>
+                            @Html.ValidationMessage("fileInput", "", new {@class = "text-danger"})
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Caption, htmlAttributes: new {@class = "control-label col-md-2"})
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Caption, new {htmlAttributes = new {@class = "form-control", id = "caption", maxlength = "50" } })
+                            @Html.ValidationMessageFor(model => model.Caption, "", new {@class = "text-danger"})
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Description, htmlAttributes: new {@class = "control-label col-md-2"})
+                        <div class="col-md-10">
+                            @Html.EditorFor(model => model.Description, new {htmlAttributes = new {@class = "form-control", id = "description", rows="4", maxlength="500" } })
+                            @Html.ValidationMessageFor(model => model.Description, "", new {@class = "text-danger"})
+                        </div>
+                    </div>
+        
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            @*<input id="sub" type="submit" value="@Resources.Create" class="btn btn-default"/>*@
+                            <span class="btn btn-default" id="sub">@Resources.Create</span>
+                            <span class="btn btn-default" id="cancel">@Resources.Cancel</span>
+                            @*@Html.RouteLink(Resources.Cancel, "Manage", new { username = User.Identity.Name }, new { @class = "btn btn-default" })*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validateFile(fileInput) {
+        var fileObj;
+        if (typeof ActiveXObject == "function") { // IE
+            fileObj = (new ActiveXObject("Scripting.FileSystemObject")).getFile(fileInput.value);
+        } else {
+            fileObj = fileInput.files[0];
+        }
+
+        var size = fileObj.size;
+
+        if (!fileObj.type.startsWith('image/')) {
+            $("[data-valmsg-for=fileInput]").html("Only images allowed");
+            fileInput.value = "";
+            return;
+        }
+
+        if (size > 20 * 1024 * 1024) {
+            $("[data-valmsg-for=fileInput]").html("To big file for uploading (20Mb - max)");
+            fileInput.value = "";
+            return;
+        } 
+
+        $("[data-valmsg-for=fileInput]").html('');
+
+    }
+
+    jQuery('.file-input').change(function () {
+        validateFile(this);
+    });
+
+  
+    $('#sub').bind('click',
+        function() {
+            //var form = $('#myForm');
+            var formData = new FormData();
+            formData.append("caption", $('input[name=Caption]')[0].value);
+            formData.append("description", $('textarea[name=Description]')[0].value);
+
+            if ($('input[name=photo')[0].files.length == 0) {
+                $("[data-valmsg-for=fileInput]").html("Please select file");
+                return;
+            }
+
+            formData.append("photo", $('input[name=photo')[0].files[0]);
+            formData.append("login", "@User.Identity.Name");
+
+            $.ajax({
+                url: "@Url.Action("CreatePost")",
+                data: formData,
+                type: 'POST',
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    if (data.Status === "success") {
+                        $("#createPostModal").modal('hide');
+                        location.reload();
+                    } else {
+                        $.each(data.FormErrors, function () {
+                            $("[data-valmsg-for=" + this.key + "]").html(this.errors.join());
+                        });
+                    }
+                }
+            });
+        });
+
+    $('#cancel').bind('click',
+        function() {
+            $("#createPostModal").modal('hide');
+        });
+</script>
+

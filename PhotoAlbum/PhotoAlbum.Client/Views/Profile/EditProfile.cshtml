@@ -1,0 +1,93 @@
+﻿@using StringResources
+@model PhotoAlbum.Client.Models.UserEditModel
+
+
+<h2>@Resources.EditProfileFormCaption</h2>
+
+
+<h4 id="successMessage"></h4>
+
+@*@using (Html.BeginForm())*@
+@using (Ajax.BeginForm("EditProfile", new AjaxOptions { OnSuccess = "onEditSuccess", OnFailure = "onEditFailure" }))
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        
+        @Html.Hidden("Login", User.Identity.Name)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="@Resources.Save" class="btn btn-default"/>
+            </div>
+        </div>
+    </div>
+}
+
+<hr />
+
+
+<div class="btn btn-default" role="button" id="changePassBtn">@Resources.ChangePassword</div>
+
+    
+<div id="formHolder"></div>
+<script>
+    
+    $('#changePassBtn').bind('click',
+        function () {
+            if (this.showFlag == true) {
+                this.showFlag = false;
+                $("#formHolder").empty();
+            } else {
+                this.showFlag = true;
+                $.ajax({
+                    type: 'GET',
+                    url: "@Url.Action("ChangePassword")",
+                    success: function(data) {
+                        $('#formHolder').html(data);
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                        if (xhr.status == 403) {
+                            window.location.replace("@Url.Action("Login", "Account")");
+                        }
+                    }
+                });
+            }
+        });
+
+    function onEditSuccess(data) {
+        $('#successMessage').html(data.SuccessMessage);
+    };
+
+    function onEditFailure(data) {
+        $.each(data.formErrors, function () {
+            $("[data-valmsg-for=" + this.key + "]").html(this.errors.join());
+        });
+    }
+</script>

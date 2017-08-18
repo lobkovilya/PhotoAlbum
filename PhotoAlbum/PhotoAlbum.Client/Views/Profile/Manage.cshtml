@@ -1,0 +1,132 @@
+﻿@using StringResources
+@model IEnumerable<PhotoAlbum.Client.Models.PostDisplayModel>
+
+@{
+    ViewBag.Title = "MyPhotos";
+}
+
+<script src="~/scripts/posts-scrolling.js"></script>
+@*<link rel="stylesheet" type="text/css" href="~/Content/stars.css">*@
+
+<div id="manage" class="app">
+    
+    <div id="editPostModalHolder"></div>
+    <div id="createPostModalHolder"></div>
+
+    <div class="container" align="center">
+        <hr/>
+        <div class="col-*-*" style="width: 80%">
+            <div class="col-*-4" align="left">
+
+                @*<a href="@Url.Action("CreatePost", "Profile")" class="btn btn-default" role="button">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    @Resources.AddPhoto
+                </a>*@
+                
+                <span class="btn btn-default" id="createPostBtn">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    @Resources.AddPhoto
+                </span>
+
+            </div>
+        </div>
+        @if (Model.Any())
+        {
+            <hr id="line"/>
+        }
+        <div class="container" id="scrollEditList">
+            @{ Html.RenderPartial("_ManagePosts", Model); }
+        </div>
+    </div>
+</div>
+
+<script src="~/scripts/star-rating.js"></script>
+
+<script>
+    $('.widget-rating').each(function () {
+        set_votes($(this));
+    });
+
+    $('#createPostBtn').bind('click',
+        function() {
+            $.ajax({
+                type: 'GET',
+                url: "@Url.Action("CreatePost")",
+                success: function (data) {
+                    $('#createPostModalHolder').html(data);
+                    $('#createPostModal').modal('show');
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    if (xhr.status == 403) {
+                        window.location.replace("@Url.Action("Login", "Account")");
+                    }
+                }
+            });
+        });
+
+    $('#scrollEditList').on(
+        'click',
+        '.deleteBtn',
+        function () {
+            if (!confirm('Do you want to delete this post?')) {
+                return;
+            }
+            var deleteBtn = $(this);
+            var id = $(deleteBtn).data('postid');
+
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action("RemovePost")",
+                data: {
+                    postId: id
+                },
+                success: function(data) {
+                    if (data.Success) {
+                        $('#post_' + id).remove();
+                        if ($('.post').length == 0) {
+                            $('#line').remove();
+                        }
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    if (xhr.status == 403) {
+                        window.location.replace("@Url.Action("Login", "Account")");
+                    }
+                }
+            });
+        });
+
+    $('#scrollEditList').on(
+        'click',
+        '.editBtn',
+        function() {
+            var editBtn = $(this);
+            var id = $(editBtn).data('postid');
+
+            $.ajax({
+                type: 'GET',
+                url: "@Url.Action("EditPost")",
+                data: {
+                    postId: id
+                },
+                success: function(data) {
+                    $('#editPostModalHolder').html(data);
+                    $('#myModal').modal('show');
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    if (xhr.status == 403) {
+                        window.location.replace("@Url.Action("Login", "Account")");
+                    }
+                }
+            });
+        });
+
+    var currentPage = 0;
+
+    $(window).scroll(function () {
+        if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+            loadPosts({ username: "@User.Identity.Name", page : ++currentPage }, "@Url.Action("Manage")", $('#scrollEditList'));
+        }
+    });
+</script>
+

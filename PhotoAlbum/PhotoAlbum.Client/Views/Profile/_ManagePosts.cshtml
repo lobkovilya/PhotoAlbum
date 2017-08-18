@@ -1,0 +1,44 @@
+﻿@using StringResources
+@model IEnumerable<PhotoAlbum.Client.Models.PostDisplayModel>
+
+
+@foreach (var item in Model)
+{
+    <div class="col-*-* post" style="width: 80%" id="post_@item.Id">
+        <div class="thumbnail">
+            <img src="@item.PhotoUrl" alt="@item.Caption" style="width: 100%">
+            <div class="col-*-4" align="left">
+                <h1 class="app-text-size">
+                    <span class="post-caption">@item.Caption</span>
+                    <span class="editBtn btn btn-default" data-postid="@item.Id">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                        @Resources.Edit
+                    </span>
+                    <span class="deleteBtn btn btn-default" data-postid="@item.Id">
+                        <span class="glyphicon glyphicon-remove"></span>
+                        @Resources.Delete
+                    </span>
+                </h1>
+                <h5 class="post-description app-text-size">@item.Description</h5>
+            </div>
+            <div class="col-*-4" align="left">
+                <h5>
+                    @Resources.PostAdded @item.Date &nbsp;
+
+                    <span class="col-*-4" align="left">
+
+                        @Resources.Rating:
+                        <span class="widget-rating" data-rate="@item.Rating" data-postid="@item.Id" title="@item.MarksAmount">
+                            <span class="star_1 rating glyphicon glyphicon-star-empty" data-rating="1"></span>
+                            <span class="star_2 rating glyphicon glyphicon-star-empty" data-rating="2"></span>
+                            <span class="star_3 rating glyphicon glyphicon-star-empty" data-rating="3"></span>
+                            <span class="star_4 rating glyphicon glyphicon-star-empty" data-rating="4"></span>
+                            <span class="star_5 rating glyphicon glyphicon-star-empty" data-rating="5"></span>
+                        </span>
+
+                    </span>
+                </h5>
+            </div>
+        </div>
+    </div>
+}

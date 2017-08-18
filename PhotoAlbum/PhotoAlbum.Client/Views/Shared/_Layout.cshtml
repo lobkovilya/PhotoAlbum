@@ -1,0 +1,95 @@
+﻿@using System.Data.Entity.Core.Metadata.Edm
+@using System.Web.Optimization
+@using StringResources
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    @*<meta name="viewport" content="width=device-width, initial-scale=1.0">*@
+    <title>@Resources.ApplicationName</title>
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/themes/base/css")
+
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryajax")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/jquerycookie")
+    
+    <link rel="stylesheet" type="text/css" href="~/Content/stars.css">
+    
+</head>
+<body>
+@Html.Hidden("LoginURL", Url.Action("Login", "Account"))
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+
+            <span class="@if (ViewBag.Title == "AllPhotos" && User.Identity.IsAuthenticated)
+                             {
+                                 @:current
+                             }">
+                    @Html.RouteLink(Resources.AllPhotos, "Default", new { controller = "Feed", action = "Posts" }, new { @class = "navbar-brand" })
+                </span>
+                
+                <span class="@if (ViewBag.Title == "MyPhotos")
+                             {
+                                 @:current
+                             }">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @Html.RouteLink(Resources.MyPhotos, "Manage", new { username = User.Identity.Name }, new { @class = "navbar-brand" })
+                    }
+                </span>
+
+            @if (HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                <div class="navbar-btn navbar-right pull-right">
+                    <div class="btn-group">
+                        @Html.RouteLink(User.Identity.Name, "User", new {username = User.Identity.Name.Trim()},
+                            new {@class = "btn btn-primary", area = "" /*, @type="button"*/})
+                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+
+                        <ul class="dropdown-menu" role="menu"> <!-- class dropdown-menu -->
+                            <li>@Html.RouteLink(Resources.Profile, "EditProfile", new {username = User.Identity.Name.Trim()})</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink(Resources.SignOut, "SignOut", "Account")</li>
+                        </ul>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="navbar-right pull-right">
+                    @Html.ActionLink(Resources.Log_In, "Login", "Account", new {area = ""}, new {@class = "navbar-brand"})
+                </div>
+            }
+        </div>
+
+        @*<div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                </ul>
+            </div>*@
+    </div>
+</div>
+
+<div class="container body-content">
+    @RenderBody()
+
+    <hr/>
+    <footer>
+        <p>&copy; @DateTime.Now.Year - @Resources.Footer</p>
+    </footer>
+</div>
+
+
+</body>
+</html>
